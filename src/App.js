@@ -8,6 +8,7 @@ import Register from './pages/Register'; // 추가
 import FlyerGallery from './pages/FlyerGallery';
 import Board from './pages/Board';
 import MyPage from './pages/MyPage';
+import StoreDetail from './pages/StoreDetail';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/Gallery" element={<FlyerGallery />} /> 
         <Route path="/board" element={<Board />} />
         <Route path="/MyPage" element={<MyPage />} />
+        <Route path="/store/:storeId" element={<StoreDetail />} />
       </Routes>
     </Router>
   );
