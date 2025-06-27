@@ -16,7 +16,7 @@ app = FastAPI()
 # 로그인 체크용 미들웨어 정의
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        protected_paths = ["/profile", "/store/form"]  # 로그인 필요 경로
+        protected_paths = ["/store/form"]  # 로그인 필요 경로
 
         if request.url.path in protected_paths:
             user_id = request.cookies.get("user_id")
@@ -108,7 +108,7 @@ def submit_store(
                 "rest": rest
             }
         })
-    
+
     try:
         user_id = request.cookies.get("user_id")
         db.collection("stores").add({
@@ -187,7 +187,7 @@ async def signup(
             "error": "이미 가입된 닉네임입니다.",
             "old": form_data
         })
-    
+
     # 아이디 중복 검사
     user_ref = db.collection("users").where("id", "==", id).get()
     if user_ref:
@@ -375,5 +375,3 @@ def get_all_posts():
         post_list.append(post)
 
     return JSONResponse(content=post_list)
-
-
