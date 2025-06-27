@@ -52,18 +52,6 @@ const StoreDetail = () => {
             <div style={styles.detailItem}><p style={styles.label}>대표 상품</p><div style={styles.valueBox}>{storeData.product}</div></div>
             <div style={styles.detailItem}><p style={styles.label}>운영 시간</p><div style={styles.valueBox}>{storeData.time}</div></div>
             <div style={styles.detailItem}><p style={styles.label}>휴무일</p><div style={styles.valueBox}>{storeData.rest}</div></div>
-
-            {/* ◀◀ 2. URL 입력 필드 추가 */}
-            <div style={styles.detailItem}>
-                <p style={styles.label}>URL</p>
-                <input
-                    type="text"
-                    value={customUrl}
-                    onChange={(e) => setCustomUrl(e.target.value)}
-                    placeholder="https://example.com"
-                    style={styles.inputBox}
-                />
-            </div>
         </div>
       </div>
     </div>
@@ -78,21 +66,10 @@ const styles = {
   rightColumn: { flex: 1, paddingTop: '60px' },
   title: { fontSize: '28px', fontWeight: 'bold', marginBottom: '20px' },
   mapContainer: { width: '100%', height: '200px', backgroundColor: '#f0f0f0', borderRadius: '15px', overflow: 'hidden', border: '1px solid #eee' },
-  flyerContainer: { width: '100%', height: '250px', backgroundColor: '#F5EEFF', borderRadius: '15px', marginTop: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#888', fontSize: '16px', border: '1px solid #eee' },
+  flyerContainer: { width: '100%', height: '500px', backgroundColor: '#F5EEFF', borderRadius: '15px', marginTop: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#888', fontSize: '16px', border: '1px solid #eee' },
   detailItem: { marginBottom: '20px' },
   label: { fontWeight: '600', fontSize: '16px', marginBottom: '8px', color: '#333' },
   valueBox: { backgroundColor: '#F5EEFF', padding: '15px', borderRadius: '10px', fontSize: '16px' },
-
-  // ◀◀ 3. 새로 추가된 입력 필드의 스타일
-  inputBox: {
-    width: '100%',
-    backgroundColor: '#F5EEFF',
-    padding: '15px',
-    borderRadius: '10px',
-    fontSize: '16px',
-    border: 'none',
-    boxSizing: 'border-box',
-  },
 };
 
 export default StoreDetail;

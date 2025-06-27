@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { useNavigate } from 'react-router-dom';
 
+const extractSrcFromIframe = (html) => {
+  const match = html.match(/src=["']([^"']+)["']/);
+  return match ? match[1] : html;
+};
+
 function Create() {
   const navigate = useNavigate();
 
@@ -31,7 +36,14 @@ function Create() {
   }, [isLoading]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    let { name, value } = e.target;
+
+    // google_map_url 입력 시 src만 추출
+    if (name === "google_map_url") {
+      value = extractSrcFromIframe(value);
+    }
+
+    setForm({ ...form, [name]: value });
   };
 
   const handleAIImageGenerate = async () => {
