@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import Navbar from '../components/Navbar'; // ✅ 공통 네비게이션 컴포넌트 import
+import Navbar from '../components/Navbar';
+import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 
 const styles = {
   home: {
@@ -13,11 +14,12 @@ const styles = {
     padding: '40px',
     gap: '60px',
   },
-  mapImage: {
-    width: '40%',
-    maxWidth: '400px',
-    height: 'auto',
+  mapContainer: {
+    width: '400px',
+    height: '300px',
     borderRadius: '12px',
+    overflow: 'hidden',
+    cursor: 'pointer',
   },
   posterContainer: {
     display: 'flex',
@@ -45,8 +47,18 @@ const posterImages = [
   '/images/poster3.jpg',
 ];
 
+// 구글 맵 중심 좌표 (의성군)
+const center = {
+  lat: 36.3555,
+  lng: 128.6975,
+};
+
 function Home() {
   const [posterIndex, setPosterIndex] = useState(0);
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+  });
 
   const handlePrev = () => {
     setPosterIndex((prevIndex) => (prevIndex - 1 + posterImages.length) % posterImages.length);
@@ -56,12 +68,30 @@ function Home() {
     setPosterIndex((prevIndex) => (prevIndex + 1) % posterImages.length);
   };
 
+  const handleMapClick = () => {
+    window.open('https://www.google.com/maps/place/경상북도+의성군', '_blank');
+  };
+
   return (
     <div style={styles.home}>
-      <Navbar /> {/* ✅ 네비게이션 컴포넌트 */}
+      <Navbar />
 
       <div style={styles.mainContent}>
-        <img src="/images/map.png" alt="지역 지도" style={styles.mapImage} />
+        {isLoaded ? (
+          <div style={styles.mapContainer} onClick={handleMapClick}>
+            <GoogleMap
+              mapContainerStyle={{ width: '100%', height: '100%' }}
+              center={center}
+              zoom={13}
+              options={{
+                disableDefaultUI: true,
+                clickableIcons: false,
+              }}
+            />
+          </div>
+        ) : (
+          <div>Loading map...</div>
+        )}
 
         <div style={styles.posterContainer}>
           <button style={styles.arrowButton} onClick={handlePrev}>◀</button>
