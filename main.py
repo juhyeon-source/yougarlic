@@ -236,7 +236,7 @@ def login(
             "request": request,
             "error": "존재하지 않는 아이디입니다."
         })
-
+ 
     user_data = users[0].to_dict()
     if not bcrypt.verify(password, user_data["password"]):
         return templates.TemplateResponse("login.html", {
@@ -290,7 +290,13 @@ def get_profile(request: Request):
         return JSONResponse(status_code=404, content={"error": "User not found"})
 
     user_data = users[0].to_dict()
-    return JSONResponse(content={"nickname": user_data["nickname"]})
+    return JSONResponse(content={
+        "nickname": user_data["nickname"],
+        "name": user_data["name"],  # username으로 사용됨
+        "id": user_data["id"],
+        "birthday": user_data["birthday"],
+        "phone_number": user_data["phone_number"]
+    })
 
 
 @app.get("/my-posts")
