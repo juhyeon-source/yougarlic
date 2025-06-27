@@ -1,169 +1,166 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
-function FlyerGallery() {
-  const [flyerImages, setFlyerImages] = useState([]);
-  const [selectedIndex, setSelectedIndex] = useState(null);
-  const [storeDesc, setStoreDesc] = useState("");
+// 이 페이지는 특정 가게의 ID를 URL 파라미터로 받아와서
+// 해당 ID에 맞는 가게 데이터를 서버에서 불러와 화면에 표시하는 역할을 합니다.
 
-  const SERVER_URL = "http://localhost:8000";
+const StoreDetail = () => {
+  // URL의 파라미터(예: /store/:storeId)에서 가게 ID를 가져옵니다.
+  const { storeId } = useParams(); 
+  
+  // 가게 데이터를 저장할 state. 실제로는 서버에서 받아옵니다.
+  const [storeData, setStoreData] = useState(null);
 
-  const generateFlyer = async () => {
-    if (!storeDesc.trim()) {
-        alert("상점 설명을 입력해주세요.");
-        return;
-    }
-    try {
-        const response = await fetch(`${SERVER_URL}/generate-flyer/image`, {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams({ user_text: storeDesc }),
-        });
+  // 컴포넌트가 처음 렌더링될 때 서버에 데이터를 요청하는 부분을 시뮬레이션합니다.
+  useEffect(() => {
+    // TODO: 실제로는 아래와 같이 서버에서 데이터를 가져와야 합니다.
+    // fetch(`http://127.0.0.1:8000/stores/${storeId}`)
+    //   .then(res => res.json())
+    //   .then(data => setStoreData(data));
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            alert("전단지 생성 실패: " + errorData.error);
-            return;
-        }
+    // 지금은 예시 데이터를 사용하여 화면을 구성합니다.
+    const mockData = {
+      id: storeId,
+      name: '아호',
+      introduce: '안녕하세요 아호입니다',
+      location: '의성군 너마늘 위한 마늘빵빌라 상가 1층 건물',
+      product: '마늘치킨',
+      google_map_url: 'https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=의성마늘한우프라자', // 실제로는 Embed용 URL이 필요합니다.
+      time: '09~10',
+      rest: '매주 화요일',
+    };
+    setStoreData(mockData);
 
-        const blob = await response.blob(); // 중요
-        const imageUrl = URL.createObjectURL(blob); // URL 생성
-        setFlyerImages((prev) => [...prev, imageUrl]); // 이미지 배열에 추가
-        setStoreDesc("");
-    } catch (error) {
-        console.error("전단지 생성 실패:", error);
-        alert("전단지 생성 중 오류가 발생했습니다.");
-    }
-};
+  }, [storeId]); // storeId가 바뀔 때마다 데이터를 다시 불러옵니다.
 
-  const handleSave = async (idx) => {
-    const imageUrl = flyerImages[idx];
-    const imageName = `flyer_${idx + 1}.png`;
 
-    try {
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = imageName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (err) {
-      console.error("이미지 저장 실패:", err);
-      alert("이미지를 저장하는 데 실패했습니다.");
-    }
-  };
-
-  const handleRegister = (idx) => {
-    const imageUrl = flyerImages[idx];
-    // 추후 DB 연동하여 저장 및 등록 기능 연결
-    alert(`등록 기능은 추후 구현 예정입니다.\n선택된 이미지 URL:\n${imageUrl}`);
-  };
+  // 로딩 중일 때 표시할 화면
+  if (!storeData) {
+    return <div>가게 정보를 불러오는 중입니다...</div>;
+  }
 
   return (
     <div>
       <Navbar />
-      <div style={{ textAlign: 'center', marginTop: '40px' }}>
-        <h2>AI 전단지 갤러리</h2>
-
-        {/* 상점 설명 입력 및 전단지 생성 */}
-        <div style={{ marginTop: '20px' }}>
-          <input
-            type="text"
-            placeholder="상점 설명을 입력하세요..."
-            value={storeDesc}
-            onChange={(e) => setStoreDesc(e.target.value)}
-            style={{
-              width: '300px',
-              padding: '10px',
-              borderRadius: '8px',
-              border: '1px solid #ccc',
-              fontSize: '1rem',
-            }}
-          />
-          <button
-            onClick={generateFlyer}
-            style={{
-              marginLeft: '10px',
-              padding: '10px 20px',
-              backgroundColor: '#a88be0',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '1rem',
-            }}
-          >
-            전단지 생성
-          </button>
+      <div style={styles.pageContainer}>
+        {/* 왼쪽 컬럼: 지도와 광고 이미지 */}
+        <div style={styles.leftColumn}>
+          <h1 style={styles.title}>의성군 상점</h1>
+          {/* 구글 지도 표시 영역 */}
+          <div style={styles.mapContainer}>
+             {/* 실제 지도 연동 시 아래 iframe을 사용하거나, 
+               @react-google-maps/api 같은 라이브러리를 사용할 수 있습니다.
+               storeData.google_map_url에 유효한 Google Maps Embed URL이 있어야 합니다.
+             */}
+            <iframe 
+              src={storeData.google_map_url}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Google Map"
+            ></iframe>
+          </div>
+          {/* 광고 이미지 */}
+          <div style={styles.adImageContainer}>
+            {/* 이 부분은 원하는 이미지로 교체할 수 있습니다. */}
+            <img src="https://via.placeholder.com/400x250.png?text=Ad+Banner" alt="Advertisement" style={{ width: '100%', borderRadius: '15px' }} />
+          </div>
         </div>
 
-        {/* 갤러리 영역 */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginTop: '40px', flexWrap: 'wrap' }}>
-          {flyerImages && flyerImages.length > 0 ? (
-            flyerImages.map((imgUrl, idx) => (
-              <div key={idx} style={{ textAlign: 'center' }}>
-                <img
-                  src={imgUrl}
-                  alt={`전단지 ${idx + 1}`}
-                  style={{
-                    width: '250px',
-                    borderRadius: '12px',
-                    boxShadow: selectedIndex === idx
-                      ? '0 0 0 4px #a88be0'
-                      : '0 4px 8px rgba(0,0,0,0.1)',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => setSelectedIndex(idx)}
-                />
-                <div style={{ marginTop: '10px' }}>
-                  <input
-                    type="radio"
-                    name="flyer"
-                    checked={selectedIndex === idx}
-                    onChange={() => setSelectedIndex(idx)}
-                  />{" "}
-                  선택
-                </div>
-                <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                  <button
-                    onClick={() => handleSave(idx)}
-                    style={{
-                      padding: '8px 20px',
-                      backgroundColor: '#e5ccfc',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '0.9rem',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    저장하기
-                  </button>
-                  <button
-                    onClick={() => handleRegister(idx)}
-                    style={{
-                      padding: '8px 20px',
-                      backgroundColor: '#e5ccfc',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '0.9rem',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    등록하기
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p style={{ marginTop: '40px' }}>생성된 전단지가 없습니다. 상점 설명을 입력 후 전단지를 생성해보세요.</p>
-          )}
+        {/* 오른쪽 컬럼: 상세 정보 */}
+        <div style={styles.rightColumn}>
+          <div style={styles.detailItem}>
+            <p style={styles.label}>상점 이름</p>
+            <div style={styles.valueBox}>{storeData.name}</div>
+          </div>
+          <div style={styles.detailItem}>
+            <p style={styles.label}>한줄 소개</p>
+            <div style={styles.valueBox}>{storeData.introduce}</div>
+          </div>
+          <div style={styles.detailItem}>
+            <p style={styles.label}>위치</p>
+            <div style={styles.valueBox}>{storeData.location}</div>
+          </div>
+          <div style={styles.detailItem}>
+            <p style={styles.label}>대표 상품</p>
+            <div style={styles.valueBox}>{storeData.product}</div>
+          </div>
+          <div style={styles.detailItem}>
+            <p style={styles.label}>Google Map URL</p>
+            <div style={styles.valueBox}>
+                {/* 링크는 a 태그를 사용해 클릭 가능하게 만듭니다. */}
+                <a href={storeData.google_map_url.replace('/embed', '/search')} target="_blank" rel="noopener noreferrer">
+                    Google 지도로 보기
+                </a>
+            </div>
+          </div>
+          <div style={styles.detailItem}>
+            <p style={styles.label}>운영 시간</p>
+            <div style={styles.valueBox}>{storeData.time}</div>
+          </div>
+          <div style={styles.detailItem}>
+            <p style={styles.label}>휴무일</p>
+            <div style={styles.valueBox}>{storeData.rest}</div>
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
-export default FlyerGallery;
+
+// 스타일 정의
+const styles = {
+  pageContainer: {
+    display: 'flex',
+    gap: '40px',
+    maxWidth: '1200px',
+    margin: '40px auto',
+    padding: '0 20px',
+    fontFamily: 'sans-serif',
+  },
+  leftColumn: {
+    flex: 1,
+  },
+  rightColumn: {
+    flex: 1,
+    paddingTop: '60px', // 제목과 높이를 맞추기 위한 여백
+  },
+  title: {
+    fontSize: '28px',
+    fontWeight: 'bold',
+    marginBottom: '20px',
+  },
+  mapContainer: {
+    width: '100%',
+    height: '300px',
+    backgroundColor: '#f0f0f0',
+    borderRadius: '15px',
+    overflow: 'hidden', // borderRadius를 iframe에 적용하기 위함
+    marginBottom: '20px',
+  },
+  adImageContainer: {
+    width: '100%',
+  },
+  detailItem: {
+    marginBottom: '20px',
+  },
+  label: {
+    fontWeight: '600',
+    fontSize: '16px',
+    marginBottom: '8px',
+    color: '#333',
+  },
+  valueBox: {
+    backgroundColor: '#F5EEFF',
+    padding: '15px',
+    borderRadius: '10px',
+    fontSize: '16px',
+  },
+};
+
+export default StoreDetail;
