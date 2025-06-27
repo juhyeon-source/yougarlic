@@ -29,10 +29,10 @@ const MyPage = () => {
         // 백엔드에서 반환한 닉네임을 포함한 사용자 정보를 상태에 저장
         setUserInfo({
           nickname: data.nickname,
-          username: "유갈릭",  // 여기는 필요시 백엔드에서 더 받아야 함
-          id: "you_garlic",
-          dateOfBirth: "2004년 01월 29일",
-          phone: "010-1234-5678"
+          username: data.name,  // 여기는 필요시 백엔드에서 더 받아야 함
+          id: data.id,
+          dateOfBirth: data.birthday,
+          phone: data.phone_number
         });
       })
       .catch(err => {
@@ -77,7 +77,10 @@ const MyPage = () => {
         </div>
 
         <div style={styles.buttonContainer}>
-          <button style={styles.button}>내 전단지 보기</button>
+          <button style={styles.button} onClick={() => window.location.href = "http://127.0.0.1:8000/my-posts"}>
+            내 전단지 보기
+          </button>
+
         </div>
       </div>
     </div>
