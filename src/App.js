@@ -7,6 +7,7 @@ import Login from './pages/Login';      // 추가
 import Register from './pages/Register'; // 추가
 import FlyerGallery from './pages/FlyerGallery';
 import Board from './pages/Board';
+import MyPage from './pages/MyPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/signup" element={<Register />} />   {/* 회원가입 */}
         <Route path="/Gallery" element={<FlyerGallery />} /> 
         <Route path="/board" element={<Board />} />
+        <Route path="/MyPage" element={<MyPage />} />
       </Routes>
     </Router>
   );
