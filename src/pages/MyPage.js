@@ -1,6 +1,7 @@
-import React from 'react';
-import Navbar from '../components/Navbar'; 
+import React, { useEffect, useState } from 'react';
+import Navbar from '../components/Navbar'; // 공통 네비게이션 바 컴포넌트
 
+// 사용자 프로필 아이콘 (간단한 SVG로 대체)
 const ProfileIcon = () => (
     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="12" cy="12" r="12" fill="#E1D0F5"/>
@@ -11,13 +12,39 @@ const ProfileIcon = () => (
 
 
 const MyPage = () => {
-  const userInfo = {
-    nickname: '너마늘',
-    username: '유갈릭',
-    id: 'you_garlic',
-    dateOfBirth: '2004년 01월 29일',
-    phone: '010-1234-5678',
-  };
+  const [userInfo, setUserInfo] = useState(null);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/profile", {
+      method: "GET",
+      credentials: "include"
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error("로그인 상태가 아닙니다.");
+        }
+        return res.json();
+      })
+      .then(data => {
+        // 백엔드에서 반환한 닉네임을 포함한 사용자 정보를 상태에 저장
+        setUserInfo({
+          nickname: data.nickname,
+          username: "유갈릭",  // 여기는 필요시 백엔드에서 더 받아야 함
+          id: "you_garlic",
+          dateOfBirth: "2004년 01월 29일",
+          phone: "010-1234-5678"
+        });
+      })
+      .catch(err => {
+        console.error("프로필 정보를 불러오지 못했습니다:", err);
+        // 필요 시 로그인 페이지로 강제 이동:
+        // window.location.href = "/login";
+      });
+  }, []);
+
+  if (!userInfo) {
+    return <div>로딩 중...</div>;
+  }
 
   return (
     <div>
@@ -49,7 +76,6 @@ const MyPage = () => {
           </div>
         </div>
 
-        {/* 로그아웃 버튼이 삭제된 버튼 컨테이너 */}
         <div style={styles.buttonContainer}>
           <button style={styles.button}>내 전단지 보기</button>
         </div>
@@ -100,8 +126,7 @@ const styles = {
   buttonContainer: {
     marginTop: '100px',
     display: 'flex',
-    // 오른쪽 정렬로 수정된 부분
-    justifyContent: 'flex-end', 
+    justifyContent: 'flex-end',
     alignItems: 'center',
     padding: '0 10px',
   },
