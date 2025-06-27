@@ -47,7 +47,7 @@ class Store(BaseModel):
     name : str = Field(..., description="가게 이름")
     introduce : str = Field(..., max_length=1000, description="가게를 소개하는 글 (최소 10자 이상)")
     location : str = Field(..., description="가게 위치")
-    google_map_url : HttpUrl = Field(..., description="구글 지도 링크")
+    google_map_url : str = Field(..., description="구글 지도 퍼가기 링크")
     product : str = Field(..., description="가게 대표 상품")
     time: str = Field(..., description="운영 시간 (예: 09시~22시)")
     rest: str = Field(..., description="휴무일 (예: 매주 화요일)")
@@ -55,23 +55,30 @@ class Store(BaseModel):
     @field_validator('location')
     @classmethod
     def validate_location(cls, v):
-        # "경상북도 의성군"으로 시작하고, 그 다음에 "**면"이 포함되어야 함
         if not re.match(r'^경상북도 의성군\s.+면', v):
             raise ValueError('주소는 "경상북도 의성군 **면 ..." 형식이어야 합니다.')
         return v
 
     @field_validator('google_map_url')
     @classmethod
-    def validate_google_map_url(cls, v: HttpUrl):
-        # 구글 맵 URL인지 확인
-        if not ("google.com" in v.host or "goo.gl" in v.host):
-            raise ValueError("구글 지도 링크여야 합니다 (예: https://www.google.com/maps/...)")
-        return v
+    def validate_google_map_url(cls, v: str):
+        # 여기서 추출하도록 수정
+        match = re.search(r'src=["\']([^"\']+)["\']', v)
+        src_url = match.group(1) if match else v
+
+        if not ("google.com/maps/embed" in src_url or "goo.gl/maps" in src_url):
+            raise ValueError("구글 지도 퍼가기 링크여야 합니다.")
+        return src_url
 
 
 @app.get("/store/form")
 def store_form(request: Request):
     return templates.TemplateResponse("store_form.html", {"request" : request})
+
+def extract_src_from_iframe(iframe_html: str) -> str:
+    """iframe 문자열에서 src URL만 추출"""
+    match = re.search(r'src=["\']([^"\']+)["\']', iframe_html)
+    return match.group(1) if match else iframe_html
 
 @app.post("/store/submit")
 def submit_store(
@@ -79,11 +86,12 @@ def submit_store(
     name : str = Form(..., description="가게 이름"),
     introduce : str = Form(..., max_length=1000, description="가게를 소개하는 글 (최소 10자 이상)"),
     location : str = Form(..., description="가게 위치 ('경상북도 의성군 **면 ...' 형식으로 작성해주세요.)"),
-    google_map_url : HttpUrl = Form(..., description="구글 지도 링크"),
+    google_map_url : str = Form(..., description="구글 지도 퍼가기 링크"),
     product : str = Form(..., description="가게 대표 상품") ,
     time: str = Form(..., description="가게 운영 시간"),
     rest: str = Form(..., description="휴무일")
 ):
+
     try:
         store = Store(
             name = name,
@@ -95,9 +103,13 @@ def submit_store(
             rest=rest
         )
     except Exception as e:
+        error_msg = str(e)
+        if "google_map_url" in error_msg:
+            error_msg = "구글 지도 퍼가기 링크를 제대로 입력했는지 확인해주세요."
+    
         return templates.TemplateResponse("store_form.html", {
-            "request" : request,
-            "error" : str(e),
+            "request": request,
+            "error": error_msg,
             "old" : {
                 "name" : name,
                 "introduce" : introduce,
@@ -381,3 +393,23 @@ def get_all_posts():
         post_list.append(post)
 
     return JSONResponse(content=post_list)
+
+
+
+
+@app.get("/api/posts/{post_id}")
+def get_post(post_id: str):
+    doc = db.collection("stores").document(post_id).get()
+
+    if not doc.exists:
+        return JSONResponse(status_code=404, content={"error": "해당 상점을 찾을 수 없습니다."})
+
+    post = doc.to_dict()
+    post["id"] = doc.id
+
+    user_id = post.get("user_id")
+    user_docs = db.collection("users").where("id", "==", user_id).get()
+    nickname = user_docs[0].to_dict().get("nickname", "알 수 없음") if user_docs else "알 수 없음"
+    post["nickname"] = nickname
+
+    return JSONResponse(content=post)
