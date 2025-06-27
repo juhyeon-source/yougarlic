@@ -111,7 +111,7 @@ function Create() {
             <label style={labelStyle}>상점 이름</label>
             <input type="text" name="name" value={form.name} onChange={handleChange} style={inputStyle} />
 
-            <label style={labelStyle}>한줄 소개(30자 이상)</label>
+            <label style={labelStyle}>한줄 소개(10자 이상)</label>
             <input type="text" name="introduce" value={form.introduce} onChange={handleChange} style={inputStyle} />
 
             <label style={labelStyle}>위치</label>

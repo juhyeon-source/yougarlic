@@ -1,64 +1,29 @@
-import React from 'react';
-import Navbar from '../components/Navbar'; // ◀◀ 1. 이 줄을 추가하세요.
+import React, { useEffect, useState } from 'react';
+import Navbar from '../components/Navbar'; 
 
-// 나중에 서버에서 받아올 실제 데이터라고 가정하는 샘플 데이터입니다.
-const storeData = [
-  // ... (데이터는 이전과 동일)
-  {
-    id: 1,
-    name: '우리집 당근이지',
-    rating: 4.0,
-    description: '눈에 좋은 거야 당근이지',
-  },
-  {
-    id: 2,
-    name: '여긴채소',
-    rating: 4.0,
-    description: '몸에 좋은 채소 존맛탱보다는 더 싸요',
-  },
-  {
-    id: 3,
-    name: '메가음료',
-    rating: 4.0,
-    description: '음료 많이 드시방께',
-  },
-  {
-    id: 4,
-    name: '싱싱농장',
-    rating: 4.5,
-    description: '오늘 막 수확한 싱싱한 채소들!',
-  },
-  {
-    id: 5,
-    name: '의성마늘닭',
-    rating: 4.8,
-    description: '의성 마늘을 듬뿍 넣은 건강 통닭',
-  },
-  {
-    id: 6,
-    name: '달콤과일가게',
-    rating: 4.2,
-    description: '제철 맞은 신선한 과일이 한가득',
-  },
-];
 
 const Board = () => {
-  return (
-    // 전체를 감싸는 div 태그
-    <div>
-      <Navbar /> {/* ◀◀ 2. 이 줄을 추가하세요. */}
+  const [storeData, setStoreData] = useState([]);
 
+  useEffect(() => {
+    fetch('http://localhost:8000/api/posts')  // FastAPI 서버 주소
+      .then((res) => res.json())
+      .then((data) => setStoreData(data))
+      .catch((err) => console.error("데이터 가져오기 오류:", err));
+  }, []);
+
+  return (
+    <div>
+      <Navbar /> 
       <div style={styles.container}>
         <h2 style={styles.title}>의성군 상점 리스트</h2>
-
         <div style={styles.listContainer}>
           {storeData.map((store) => (
             <div key={store.id} style={styles.card}>
               <div style={styles.imagePlaceholder}></div>
               <div style={styles.cardContent}>
                 <h3 style={styles.storeName}>{store.name}</h3>
-                <p style={styles.rating}>⭐ ({store.rating.toFixed(1)})</p>
-                <p style={styles.description}>{store.description}</p>
+                <p style={styles.description}>{store.introduce}</p>
               </div>
             </div>
           ))}
