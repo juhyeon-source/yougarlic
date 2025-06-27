@@ -1,7 +1,6 @@
 import React from 'react';
-import Navbar from '../components/Navbar'; // 공통 네비게이션 바 컴포넌트
+import Navbar from '../components/Navbar'; 
 
-// 사용자 프로필 아이콘 (간단한 SVG로 대체)
 const ProfileIcon = () => (
     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="12" cy="12" r="12" fill="#E1D0F5"/>
@@ -50,9 +49,8 @@ const MyPage = () => {
           </div>
         </div>
 
+        {/* 로그아웃 버튼이 삭제된 버튼 컨테이너 */}
         <div style={styles.buttonContainer}>
-          {/* 두 버튼 모두 동일한 스타일을 사용하도록 수정 */}
-          <button style={styles.button}>로그아웃</button>
           <button style={styles.button}>내 전단지 보기</button>
         </div>
       </div>
@@ -60,7 +58,6 @@ const MyPage = () => {
   );
 };
 
-// --- 스타일 수정 ---
 const styles = {
   container: {
     width: '100%',
@@ -70,7 +67,6 @@ const styles = {
     fontFamily: 'sans-serif',
   },
   pageTitle: {
-    // 폰트 크기 증가 (28px -> 30px)
     fontSize: '30px',
     fontWeight: 'bold',
     marginBottom: '20px',
@@ -84,7 +80,6 @@ const styles = {
     gap: '20px',
   },
   profileName: {
-    // 폰트 크기 증가 (24px -> 26px)
     fontSize: '26px',
     fontWeight: 'bold',
   },
@@ -94,7 +89,6 @@ const styles = {
   },
   detailItem: {
     display: 'flex',
-    // 폰트 크기 증가 (16px -> 18px)
     fontSize: '18px',
     marginBottom: '25px',
   },
@@ -104,17 +98,15 @@ const styles = {
     color: '#333',
   },
   buttonContainer: {
-    // 버튼 위치를 아래로 내리기 위해 위쪽 여백 증가 (60px -> 100px)
     marginTop: '100px',
     display: 'flex',
-    justifyContent: 'space-between',
+    // 오른쪽 정렬로 수정된 부분
+    justifyContent: 'flex-end', 
     alignItems: 'center',
     padding: '0 10px',
   },
-  // 버튼 스타일을 하나로 통일
   button: {
     padding: '12px 28px',
-    // 폰트 크기 증가 (16px -> 17px)
     fontSize: '17px',
     fontWeight: 'bold',
     color: '#333',
