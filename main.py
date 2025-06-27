@@ -45,7 +45,7 @@ def home():
 
 class Store(BaseModel):
     name : str = Field(..., description="가게 이름")
-    introduce : str = Field(..., max_length=1000, description="가게를 소개하는 글 (최소 30자 이상)")
+    introduce : str = Field(..., max_length=1000, description="가게를 소개하는 글 (최소 10자 이상)")
     location : str = Field(..., description="가게 위치")
     google_map_url : HttpUrl = Field(..., description="구글 지도 링크")
     product : str = Field(..., description="가게 대표 상품")
@@ -77,7 +77,7 @@ def store_form(request: Request):
 def submit_store(
     request : Request,
     name : str = Form(..., description="가게 이름"),
-    introduce : str = Form(..., max_length=1000, description="가게를 소개하는 글 (최소 30자 이상)"),
+    introduce : str = Form(..., max_length=1000, description="가게를 소개하는 글 (최소 10자 이상)"),
     location : str = Form(..., description="가게 위치 ('경상북도 의성군 **면 ...' 형식으로 작성해주세요.)"),
     google_map_url : HttpUrl = Form(..., description="구글 지도 링크"),
     product : str = Form(..., description="가게 대표 상품") ,
@@ -356,4 +356,24 @@ def all_posts(request: Request):
         "request": request,
         "posts": post_list
     })
+
+
+@app.get("/api/posts")
+def get_all_posts():
+    posts = db.collection("stores").get()
+    post_list = []
+
+    for doc in posts:
+        post = doc.to_dict()
+
+        user_id = post.get("user_id")
+        user_docs = db.collection("users").where("id", "==", user_id).get()
+        nickname = user_docs[0].to_dict().get("nickname", "알 수 없음") if user_docs else "알 수 없음"
+        post["nickname"] = nickname
+        post["id"] = doc.id  # ← 필요시 클라이언트에서 삭제 등 활용 가능
+
+        post_list.append(post)
+
+    return JSONResponse(content=post_list)
+
 
