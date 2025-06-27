@@ -3,6 +3,7 @@ __pycache__/
 .venv/
 .env
 
+
 # 환경 변수
 key.env
 
