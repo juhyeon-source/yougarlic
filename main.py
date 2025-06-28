@@ -70,6 +70,15 @@ class Store(BaseModel):
         if not ("google.com/maps/embed" in src_url or "goo.gl/maps" in src_url):
             raise ValueError("구글 지도 퍼가기 링크여야 합니다.")
         return src_url
+    
+class StoreInfo(BaseModel):
+    name: str
+    introduce: str
+    location: str
+    time: str
+    rest: str
+    google_map_url: str
+    product: str
 
 
 @app.get("/store/form")
@@ -145,6 +154,25 @@ def submit_store(
         "store": store,
         "nickname": nickname 
     })
+
+@app.post("/stores")
+async def save_store(info: StoreInfo, request: Request):
+    try:
+        user_id = request.cookies.get("user_id")  # 로그인된 사용자 ID 확인
+
+        if not user_id:
+            return JSONResponse(status_code=401, content={"error": "로그인되지 않았습니다."})
+
+        # Firestore 저장
+        db.collection("stores").add({
+            **info.model_dump(),
+            "user_id": user_id
+        })
+
+        return {"message": "상점 저장 성공"}
+    
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": f"Firestore 저장 중 오류 발생: {str(e)}"})
 
 
 # 회원가입
