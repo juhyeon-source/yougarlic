@@ -9,6 +9,7 @@ from passlib.context import CryptContext
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 import re
+from routers import ai
 
 
 app = FastAPI()
@@ -484,6 +485,7 @@ def edit_profile(request: Request):
         return RedirectResponse("/login", status_code=302)
 
     user_docs = db.collection("users").where("id", "==", user_id).get()
+    
     if not user_docs:
         return RedirectResponse("/login", status_code=302)
 
@@ -536,3 +538,9 @@ async def update_profile(
         })
 
     return RedirectResponse("/profile", status_code=302)
+
+
+
+
+
+app.include_router(ai.router)

@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+*.pyc
 *.env
 *.env.*
 
@@ -30,3 +31,14 @@ Thumbs.db
 
 # Firebase 비공개 키
 firebase_key.json
+
+# 환경 변수 및 인증 파일
+key.env
+*.json
+
+# 출력 이미지
+output/
+
+# IDE 설정
+.vscode/
+*.code-workspace
