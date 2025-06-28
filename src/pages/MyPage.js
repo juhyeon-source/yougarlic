@@ -78,10 +78,9 @@ const MyPage = () => {
 
          <div style={styles.buttonContainer}>
           {/* 1. "내 정보 수정" 버튼 추가 */}
-          <button style={styles.button} onClick={() => alert('내 정보 수정 페이지로 이동합니다.')}>
+          <button style={styles.button} onClick={() => window.location.href = "/edit-profile"}>
             내 정보 수정
           </button>
-          
           <button style={styles.button} onClick={() => window.location.href = "http://127.0.0.1:8000/my-posts"}>
             내 전단지 보기
           </button>
