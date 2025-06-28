@@ -64,12 +64,13 @@ app: main.py 파일 내의 FastAPI 애플리케이션 객체입니다.
 📦 설치된 주요 모듈
 이 프로젝트는 다음의 주요 Python 패키지들을 사용합니다.
 
-패키지 이름	설명
-fastapi	웹 프레임워크
-uvicorn	ASGI 서버 (개발용 핫 리로딩 포함)
-python-multipart	HTML Form 데이터 처리용 (FastAPI의 Form 사용 시 필수)
-jinja2	템플릿 렌더링 엔진
-pydantic	데이터 검증 및 유효성 검사 (Form 검증에 사용)
-aiofiles (선택)	파일 업로드가 필요한 경우 사용할 수 있음
-httpx (선택)	비동기 HTTP 요청 (필요 시)
-starlette	FastAPI 내부 기반 프레임워크 (fastapi에 포함)
+| 패키지 이름         | 설명                                                 |
+| :------------------ | :--------------------------------------------------- |
+| `fastapi`           | 웹 프레임워크                                        |
+| `uvicorn`           | ASGI 서버 (개발용 핫 리로딩 포함)                    |
+| `python-multipart`  | HTML Form 데이터 처리용 (FastAPI의 Form 사용 시 필수) |
+| `jinja2`            | 템플릿 렌더링 엔진                                   |
+| `pydantic`          | 데이터 검증 및 유효성 검사 (Form 검증에 사용)        |
+| `aiofiles` (선택)   | 파일 업로드가 필요한 경우 사용할 수 있음             |
+| `httpx` (선택)      | 비동기 HTTP 요청 (필요 시)                           |
+| `starlette`         | FastAPI 내부 기반 프레임워크 (`fastapi`에 포함)      |
