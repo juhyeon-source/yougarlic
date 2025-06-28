@@ -1,37 +1,23 @@
-from fastapi import FastAPI, Request, Form, Body
+from fastapi import FastAPI, Request, Form, Body, APIRouter
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field, field_validator, HttpUrl
-from firebase_config import db
-from passlib.hash import bcrypt
-from passlib.context import CryptContext
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field, field_validator
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
+from firebase_admin import firestore
+from passlib.context import CryptContext
 import re
+
+# 내부 모듈
+from firebase_config import db
+from middlewares import AuthMiddleware
 from routers import ai
 
-
+# --- FastAPI 앱 초기화 및 설정 ---
 app = FastAPI()
-
-# 로그인 체크용 미들웨어 정의
-class AuthMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        protected_paths = ["/store/form"]  # 로그인 필요 경로
-
-        if request.url.path in protected_paths:
-            user_id = request.cookies.get("user_id")
-            if not user_id:
-                return RedirectResponse("/login", status_code=302)
-
-        response = await call_next(request)
-        return response
-
-# 미들웨어 등록
+app.mount("/static", StaticFiles(directory="output"), name="static")
 app.add_middleware(AuthMiddleware)
-
-templates = Jinja2Templates(directory="templates")
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -39,6 +25,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(ai.router)
+
+# --- Jinja2 템플릿 설정 ---
+templates = Jinja2Templates(directory="templates")
+
 
 @app.get("/")
 def home():
@@ -79,6 +71,10 @@ class StoreInfo(BaseModel):
     rest: str
     google_map_url: str
     product: str
+
+class FlyerSaveRequest(BaseModel):
+    post_id: str
+    flyer_url: str
 
 
 @app.get("/store/form")
@@ -163,14 +159,15 @@ async def save_store(info: StoreInfo, request: Request):
         if not user_id:
             return JSONResponse(status_code=401, content={"error": "로그인되지 않았습니다."})
 
-        # Firestore 저장
-        db.collection("stores").add({
+        # Firestore에 문서 객체 만들고 ID 저장
+        doc_ref = db.collection("stores").document()  # 문서 ID 수동 생성
+        doc_ref.set({
             **info.model_dump(),
             "user_id": user_id
         })
 
-        return {"message": "상점 저장 성공"}
-    
+        return {"message": "상점 저장 성공", "post_id": doc_ref.id}  # ✅ post_id 반환
+
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": f"Firestore 저장 중 오류 발생: {str(e)}"})
 
@@ -504,6 +501,33 @@ def search_store_by_name(name: str):
 
     doc = query[0]
     return JSONResponse(content={"id": doc.id})
+
+
+class FlyerSaveRequest(BaseModel):
+    post_id: str
+    flyer_url: str
+
+@app.post("/api/save-flyer")
+def save_flyer(request: Request, body: FlyerSaveRequest):
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        return JSONResponse(status_code=401, content={"error": "로그인이 필요합니다."})
+
+    post_ref = db.collection("stores").document(body.post_id)
+    doc = post_ref.get()
+
+    if not doc.exists:
+        return JSONResponse(status_code=404, content={"error": "해당 상점이 존재하지 않습니다."})
+
+    post_data = doc.to_dict()
+    if post_data.get("user_id") != user_id:
+        return JSONResponse(status_code=403, content={"error": "저장 권한이 없습니다."})
+
+    post_ref.update({
+        "flyer_image_url": body.flyer_url
+    })
+
+    return JSONResponse(content={"message": "전단지 이미지가 저장되었습니다."})
 
 
 @app.get("/edit-profile")

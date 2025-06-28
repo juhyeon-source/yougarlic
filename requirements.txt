@@ -6,3 +6,8 @@ Pillow
 google-generativeai
 google-cloud-aiplatform
 vertexai
+jinja2
+firebase-admin
+passlib[bcrypt]
+google-cloud-firestore
+starlette
