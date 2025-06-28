@@ -28,7 +28,7 @@ Frontend
 
 python -m venv .venv
 source .venv/bin/activate  # macOS/Linux
-# .\.venv\Scripts\activate # Windows
+.\.venv\Scripts\activate # Windows
 
 2.필요한 패키지를 설치합니다.
 아래 명령어를 사용하여 모든 필수 패키지를 한 번에 설치할 수 있습니다.
