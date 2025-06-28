@@ -52,17 +52,20 @@ function Create() {
   setIsLoading(true);
 
   try {
-    // 🔹 1. Firestore에 상점 정보 저장
+    // 🔹 1. 상점 정보 저장
     const storeRes = await fetch("http://localhost:8000/stores", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include", // ✅ 쿠키 포함!
+      credentials: "include", // ✅ 쿠키 포함
       body: JSON.stringify(form),
     });
 
     if (!storeRes.ok) throw new Error("상점 정보 저장 실패");
 
-    // 🔹 2. AI 이미지 생성 요청
+    const storeData = await storeRes.json();  // ✅ post_id 추출
+    const postId = storeData.post_id;
+
+    // 🔄 이 코드로 수정
     const aiRes = await fetch("http://localhost:8000/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -73,11 +76,20 @@ function Create() {
       }),
     });
 
-    if (!aiRes.ok) throw new Error("AI 이미지 생성 실패");
+    const aiData = await aiRes.json();
+    const imageUrls = aiData.image_urls;
 
-    // (이미지 응답 처리는 안 해도 되고, navigate만 하면 됨)
-    alert("상점 등록과 전단지 생성이 완료되었습니다!");
-    navigate('/');  // 홈으로 이동
+    navigate('/my-posts', {
+      state: {
+        store_id: postId,  // ✅ 전달!
+        generatedFlyers: [
+          { id: 'flyer1', url: imageUrls[0] },
+          { id: 'flyer2', url: imageUrls[1] },
+        ]
+      }
+    });
+
+
 
   } catch (err) {
     console.error("에러 발생:", err);

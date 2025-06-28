@@ -1,37 +1,70 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar'; // 공통 네비게이션 바
-import './MyPosts.css'; // 이 페이지를 위한 전용 스타일
+import Navbar from '../components/Navbar';
+import './MyPosts.css';
 
 const MyPosts = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // 생성된 전단지 시안 목록 (지금은 비어있음)
     const [flyers, setFlyers] = useState([]);
     const [selectedFlyer, setSelectedFlyer] = useState(null);
+    const [storeId, setStoreId] = useState(null);  // ✅ 상점 ID 추적용
 
     useEffect(() => {
-        // 1. '상점 정보 등록'에서 생성 직후 넘어온 경우
-        if (location.state && location.state.generatedFlyers) {
-            console.log("상점 등록 후 생성된 전단지 정보를 표시합니다.");
+        const fetchFlyers = async () => {
+            const res = await fetch("http://localhost:8000/api/posts", {
+            credentials: "include"
+            });
+            const data = await res.json();
+            const myFlyers = data
+            .filter(post => post.flyer_image_url)
+            .map(post => ({
+                id: post.id,
+                url: post.flyer_image_url
+            }));
+            setFlyers(myFlyers);
+        };
+
+        if (location.state?.generatedFlyers) {
             setFlyers(location.state.generatedFlyers);
-        } 
-        // 2. '마이페이지'에서 그냥 '내 전단지 보기'를 눌러 넘어온 경우
-        else {
-            console.log("저장된 내 전단지 목록을 불러옵니다. (현재는 임시 데이터 사용)");
-            // TODO: 추후에는 여기서 서버 API를 호출하여
-            // 사용자가 저장한 전단지 목록을 가져와야 합니다.
-            const mockData = [
-                { id: 'flyer1' },
-                { id: 'flyer2' }
-            ];
-            setFlyers(mockData);
+        } else {
+            fetchFlyers();
         }
-    }, [location]);
+        }, [location]);
 
     const handleSelectFlyer = (flyer) => {
         setSelectedFlyer(flyer);
+    };
+
+    const handleSaveFlyer = async () => {
+        if (!selectedFlyer || !storeId) {
+            alert("전단지를 선택하거나 상점 ID가 없습니다.");
+            return;
+        }
+
+        try {
+            const res = await fetch("http://localhost:8000/api/save-flyer", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    post_id: storeId,
+                    flyer_url: selectedFlyer.url
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                alert("전단지가 저장되었습니다!");
+            } else {
+                alert("저장 실패: " + data.error);
+            }
+        } catch (err) {
+            console.error("저장 중 오류:", err);
+            alert("저장 중 오류 발생");
+        }
     };
 
     return (
@@ -42,8 +75,12 @@ const MyPosts = () => {
                 <div className="flyer-selection-container">
                     {flyers.map((flyer, index) => (
                         <div key={index} className="flyer-item-box">
-                            {/* AI 연동 전이므로, 이미지는 비워두고 공간만 차지합니다. */}
-                            <div className="flyer-image-placeholder"></div>
+                            <img
+                                src={flyer.url}
+                                alt={`전단지 ${index + 1}`}
+                                className="flyer-image"
+                                style={{ width: '100%', height: 'auto', marginBottom: '10px' }}
+                            />
                             <div className="flyer-radio-button">
                                 <input
                                     type="radio"
@@ -59,7 +96,7 @@ const MyPosts = () => {
                 </div>
                 <div className="myposts-button-group">
                     <button className="myposts-button" onClick={() => navigate('/create')}>다시 제작</button>
-                    <button className="myposts-button">저장하기</button>
+                    <button className="myposts-button" onClick={handleSaveFlyer}>저장하기</button>
                     <button className="myposts-button">등록하기</button>
                 </div>
             </div>
