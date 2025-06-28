@@ -7,17 +7,17 @@ from pydantic import BaseModel, Field, field_validator
 from starlette.middleware.base import BaseHTTPMiddleware
 from firebase_admin import firestore
 from passlib.context import CryptContext
+from passlib.hash import bcrypt
 import re
 
 # 내부 모듈
 from firebase_config import db
-from middlewares import AuthMiddleware
 from routers import ai
 
 # --- FastAPI 앱 초기화 및 설정 ---
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="output"), name="static")
-app.add_middleware(AuthMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -30,6 +30,18 @@ app.include_router(ai.router)
 
 # --- Jinja2 템플릿 설정 ---
 templates = Jinja2Templates(directory="templates")
+
+class AuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        protected_paths = ["/store/form"]
+
+        if request.url.path in protected_paths:
+            user_id = request.cookies.get("user_id")
+            if not user_id:
+                return RedirectResponse("/login", status_code=302)
+
+        response = await call_next(request)
+        return response
 
 
 @app.get("/")
