@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, Body
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
@@ -311,6 +311,39 @@ def get_profile(request: Request):
     })
 
 
+@app.put("/api/profile")
+async def update_api_profile(
+    request: Request,
+    data: dict = Body(...)
+):
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        return JSONResponse(status_code=401, content={"error": "로그인되지 않았습니다."})
+
+    user_docs = db.collection("users").where("id", "==", user_id).get()
+    if not user_docs:
+        return JSONResponse(status_code=404, content={"error": "사용자를 찾을 수 없습니다."})
+
+    user_ref = user_docs[0].reference
+
+    try:
+        update_data = {}
+        if "nickname" in data:
+            update_data["nickname"] = data["nickname"]
+
+        if "password" in data and data["password"]:
+            # 비밀번호 변경 요청이 있을 경우 해싱 후 저장
+            pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+            hashed_pw = pwd_context.hash(data["password"])
+            update_data["password"] = hashed_pw
+
+        user_ref.update(update_data)
+        return JSONResponse(content={"message": "정보가 성공적으로 수정되었습니다."})
+    
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": f"수정 중 오류 발생: {str(e)}"})
+
+
 @app.get("/my-posts")
 def my_posts(request: Request):
     user_id = request.cookies.get("user_id")
@@ -434,10 +467,6 @@ def get_post_id_by_store_name(name: str):
     return JSONResponse(content={"post_id": docs[0].id})
 
 
-
-
-
-
 @app.get("/api/posts/search")
 def search_store_by_name(name: str):
     query = db.collection("stores").where("name", "==", name).get()
@@ -448,3 +477,62 @@ def search_store_by_name(name: str):
     return JSONResponse(content={"id": doc.id})
 
 
+@app.get("/edit-profile")
+def edit_profile(request: Request):
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        return RedirectResponse("/login", status_code=302)
+
+    user_docs = db.collection("users").where("id", "==", user_id).get()
+    if not user_docs:
+        return RedirectResponse("/login", status_code=302)
+
+    user_data = user_docs[0].to_dict()
+
+    return templates.TemplateResponse("edit_profile.html", {
+        "request": request,
+        "user": user_data
+    })
+
+
+@app.post("/edit-profile")
+async def update_profile(
+    request: Request,
+    name: str = Form(...),
+    nickname: str = Form(...),
+    phone_number: str = Form(...)
+):
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        return RedirectResponse("/login", status_code=302)
+
+    form_data = await request.form()
+
+    # 전화번호 형식 검사
+    if not re.match(r"^\d{3}-\d{4}-\d{4}$", phone_number):
+        return templates.TemplateResponse("edit_profile.html", {
+            "request": request,
+            "user": form_data,
+            "error": "전화번호 형식이 올바르지 않습니다. 예: 010-1234-5678"
+        })
+
+    try:
+        user_docs = db.collection("users").where("id", "==", user_id).get()
+        if not user_docs:
+            return RedirectResponse("/login", status_code=302)
+
+        user_ref = user_docs[0].reference
+        user_ref.update({
+            "name": name,
+            "nickname": nickname,
+            "phone_number": phone_number
+        })
+
+    except Exception as e:
+        return templates.TemplateResponse("edit_profile.html", {
+            "request": request,
+            "user": form_data,
+            "error": f"정보 수정 중 오류 발생: {str(e)}"
+        })
+
+    return RedirectResponse("/profile", status_code=302)
