@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 
+// 1. 버튼 관련 스타일이 제거된 styles 객체
 const styles = {
   home: {
     display: 'flex',
@@ -47,7 +49,6 @@ const posterImages = [
   '/images/poster3.jpg',
 ];
 
-// 구글 맵 중심 좌표 (의성군)
 const center = {
   lat: 36.3555,
   lng: 128.6975,
@@ -55,9 +56,12 @@ const center = {
 
 function Home() {
   const [posterIndex, setPosterIndex] = useState(0);
+  const navigate = useNavigate();
+
+  // 2. handleCreateClick 함수 삭제됨
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+    googleMapsApiKey: process.env.REACT_APP_Maps_API_KEY, // 이 부분과 .env 파일의 변수 이름을 꼭 확인하세요!
   });
 
   const handlePrev = () => {
@@ -77,6 +81,8 @@ function Home() {
       <Navbar />
 
       <div style={styles.mainContent}>
+        {/* 3. 상점 등록하기 버튼 JSX 삭제됨 */}
+
         {isLoaded ? (
           <div style={styles.mapContainer} onClick={handleMapClick}>
             <GoogleMap

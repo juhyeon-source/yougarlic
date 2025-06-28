@@ -88,7 +88,6 @@ const MyPage = () => {
           <button style={styles.button} onClick={handleEditProfileClick}>
             내 정보 수정
           </button>
-          
           <button style={styles.button} onClick={() => window.location.href = "http://127.0.0.1:8000/my-posts"}>
             내 전단지 보기
           </button>

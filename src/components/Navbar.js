@@ -24,6 +24,7 @@ const styles = {
     textDecoration: 'none',
     color: '#333',
     fontWeight: '500',
+    cursor: 'pointer', // 클릭 가능하다는 것을 알려주기 위해 커서 모양 변경
   },
   rightNav: {
     display: 'flex',
@@ -58,6 +59,7 @@ function Navbar() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // 쿠키를 사용한 기존 로그인 상태 확인 로직은 그대로 유지합니다.
     const userId = Cookies.get('user_id');
     if (userId) {
       setIsLoggedIn(true);
@@ -74,6 +76,9 @@ function Navbar() {
           console.error(err);
           setNickname('');
         });
+    } else {
+      // 쿠키가 없으면 로그아웃 상태로 명확히 설정
+      setIsLoggedIn(false);
     }
   }, []);
 
@@ -93,39 +98,51 @@ function Navbar() {
       });
   };
 
-const handleSearch = async (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    if (!searchText.trim()) return;
-
-    try {
-      // 1. 이름으로 post_id 가져오기
-      const res = await fetch(`http://localhost:8000/api/posts/get_post_id/?name=${encodeURIComponent(searchText)}`);
-      if (!res.ok) {
-        alert('등록되어 있지 않은 상점입니다.');
-        return;
+  const handleSearch = async (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (!searchText.trim()) return;
+      try {
+        const res = await fetch(`http://localhost:8000/api/posts/get_post_id/?name=${encodeURIComponent(searchText)}`);
+        if (!res.ok) {
+          alert('등록되어 있지 않은 상점입니다.');
+          return;
+        }
+        const data = await res.json();
+        navigate(`/store/${data.post_id}`);
+      } catch (err) {
+        console.error('검색 오류:', err);
+        alert('검색 중 오류가 발생했습니다.');
       }
-
-      const data = await res.json();
-
-      // 2. post_id로 이동
-      navigate(`/store/${data.post_id}`);
-    } catch (err) {
-      console.error('검색 오류:', err);
-      alert('검색 중 오류가 발생했습니다.');
     }
-  }
-};
+  };
 
+  // ▼▼▼▼▼ '보호된 링크' 클릭 핸들러 추가 ▼▼▼▼▼
+  const handleProtectedLinkClick = (path) => {
+    // localStorage를 확인하는 대신, 이미 가지고 있는 isLoggedIn 상태를 사용합니다.
+    if (isLoggedIn) {
+      navigate(path);
+    } else {
+      alert('로그인이 필요한 기능입니다.');
+      navigate('/login');
+    }
+  };
+  // ▲▲▲▲▲ 여기까지 추가 ▲▲▲▲▲
 
   return (
     <nav style={styles.navbar}>
       <div style={styles.leftNav}>
         <Link to="/" style={styles.logo}>너마늘</Link>
         <div style={styles.navLinks}>
-          <Link to="/create" style={styles.navLink}>Create</Link>
+          {/* ▼▼▼▼▼ Create와 MyPage 링크를 onClick 이벤트로 변경 ▼▼▼▼▼ */}
+          <div onClick={() => handleProtectedLinkClick('/create')} style={styles.navLink}>
+            Create
+          </div>
           <Link to="/board" style={styles.navLink}>Board</Link>
-          <Link to="/mypage" style={styles.navLink}>MyPage</Link>
+          <div onClick={() => handleProtectedLinkClick('/mypage')} style={styles.navLink}>
+            MyPage
+          </div>
+          {/* ▲▲▲▲▲ 여기까지 수정 ▲▲▲▲▲ */}
         </div>
       </div>
       <div style={styles.rightNav}>
@@ -135,7 +152,7 @@ const handleSearch = async (e) => {
           style={styles.searchBar}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          onKeyDown={handleSearch} // ◀◀ 키 입력 이벤트로 검색
+          onKeyDown={handleSearch}
         />
         {isLoggedIn && <span>{nickname} 님</span>}
         {isLoggedIn ? (
