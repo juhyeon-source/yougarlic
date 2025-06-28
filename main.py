@@ -413,3 +413,38 @@ def get_post(post_id: str):
     post["nickname"] = nickname
 
     return JSONResponse(content=post)
+
+
+@app.get("/api/posts/get_post_id/")
+def get_post_id_by_store_name(name: str):
+    name_stripped = name.strip()
+    print(f"[DEBUG] 요청 받은 name = {name_stripped!r}")
+
+    query = db.collection("stores").where("name", "==", name_stripped).get()
+    docs = [doc for doc in query]
+
+    if len(docs) == 0:
+        print("[DEBUG] 🔍 Firestore에 해당 이름 문서 없음")
+        return JSONResponse(status_code=404, content={"error": "해당 상점이 없습니다."})
+
+    print(f"[DEBUG] 찾은 문서 개수: {len(docs)}")
+    for doc in docs:
+        print(f"[DEBUG] 문서 ID: {doc.id}, name: {doc.to_dict().get('name')!r}")
+
+    return JSONResponse(content={"post_id": docs[0].id})
+
+
+
+
+
+
+@app.get("/api/posts/search")
+def search_store_by_name(name: str):
+    query = db.collection("stores").where("name", "==", name).get()
+    if not query:
+        return JSONResponse(status_code=404, content={"error": "해당 이름의 상점이 존재하지 않습니다."})
+
+    doc = query[0]
+    return JSONResponse(content={"id": doc.id})
+
+
