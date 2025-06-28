@@ -45,24 +45,33 @@ const EditProfile = () => {
     const { name, value } = e.target;
     setPasswords(prevState => ({ ...prevState, [name]: value }));
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (passwords.password && passwords.password !== passwords.passwordAgain) {
       alert('비밀번호가 일치하지 않습니다.');
       return;
     }
-    // ... 서버로 수정된 정보 전송 로직 (이전과 동일)
+
+    // 요청할 데이터 구성
+    const updateData = {
+      nickname: userInfo.nickname
+    };
+    if (passwords.password) {
+      updateData.password = passwords.password;
+    }
+
     try {
       const response = await fetch("http://localhost:8000/api/profile", {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nickname: userInfo.nickname,
-          password: passwords.password,
-        }),
+        credentials: 'include',
+        body: JSON.stringify(updateData),
       });
+
       if (!response.ok) throw new Error('정보 수정에 실패했습니다.');
+
       alert('정보가 성공적으로 수정되었습니다!');
       navigate('/mypage');
     } catch (error) {
@@ -70,7 +79,6 @@ const EditProfile = () => {
       alert(error.message);
     }
   };
-
   // 3. 데이터가 로딩되기 전에는 "로딩 중"을 표시
   if (!userInfo) {
     return <div>로딩 중...</div>;
@@ -78,7 +86,9 @@ const EditProfile = () => {
 
   return (
     <div style={styles.page}>
-      <header style={styles.header}>너마늘</header>
+      <header style={styles.header} onClick={() => navigate('/')} role="button">
+        너마늘
+      </header>
       <div style={styles.container}>
         <div style={styles.titleContainer}>
           <h1 style={styles.title}>내 정보 수정</h1>
@@ -132,6 +142,7 @@ const styles = {
     color: '#C4A1FF',
     fontSize: '24px',
     fontWeight: 'bold',
+    cursor: 'pointer',
   },
   container: {
     width: '100%',
@@ -186,7 +197,7 @@ const styles = {
     padding: '15px',
     fontSize: '18px',
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#000',
     backgroundColor: '#E1CFFF', // 이미지의 버튼 색상
     border: 'none',
     borderRadius: '8px',
