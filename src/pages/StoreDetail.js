@@ -40,8 +40,17 @@ const StoreDetail = () => {
             )}
           </div>
           <div style={styles.flyerContainer}>
-            <span>생성된 전단지가 여기에 표시됩니다.</span>
+            {storeData.flyer_image_url ? (
+              <img
+                src={storeData.flyer_image_url}
+                alt="전단지 이미지"
+                style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '15px' }}
+              />
+            ) : (
+              <span>전단지 이미지가 없습니다.</span>
+            )}
           </div>
+
         </div>
 
         <div style={styles.rightColumn}>

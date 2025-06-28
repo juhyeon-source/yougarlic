@@ -84,3 +84,57 @@
 .myposts-button:hover {
     background-color: #b383f5;
 }
+
+/* 📌 선택된 전단지와 정보 보여주는 레이아웃 */
+.flyer-detail-container {
+    display: flex;
+    gap: 40px;
+    width: 100%;
+    max-width: 900px;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 60px;
+}
+
+.flyer-detail-left {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.selected-flyer-image {
+    width: 100%;
+    max-width: 350px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 📌 오른쪽 상점 정보 스타일 */
+.flyer-detail-right {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 12px;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.flyer-detail-right h2 {
+    font-size: 1.8rem;
+    margin-bottom: 12px;
+    color: #663399;
+}
+
+.flyer-detail-right p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.flyer-detail-right strong {
+    color: #555;
+}
+

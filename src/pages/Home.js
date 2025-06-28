@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 
+console.log("✅ 구글 키 확인:", process.env.REACT_APP_GOOGLE_MAPS_API_KEY);
+
+
+
 // 1. 버튼 관련 스타일이 제거된 styles 객체
 const styles = {
   home: {
