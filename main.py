@@ -517,7 +517,7 @@ def search_store_by_name(name: str):
 
 class FlyerSaveRequest(BaseModel):
     post_id: str
-    flyer_url: str
+    flyer_url: str  # base64 형태의 이미지
 
 @app.post("/api/save-flyer")
 def save_flyer(request: Request, body: FlyerSaveRequest):
@@ -535,11 +535,13 @@ def save_flyer(request: Request, body: FlyerSaveRequest):
     if post_data.get("user_id") != user_id:
         return JSONResponse(status_code=403, content={"error": "저장 권한이 없습니다."})
 
+    # ✅ base64 문자열 저장
     post_ref.update({
         "flyer_image_url": body.flyer_url
     })
 
-    return JSONResponse(content={"message": "전단지 이미지가 저장되었습니다."})
+    return JSONResponse(content={"message": "전단지 이미지가 url 형태로 저장되었습니다."})
+
 
 
 @app.get("/edit-profile")
