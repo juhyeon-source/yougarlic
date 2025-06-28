@@ -76,11 +76,15 @@ const MyPage = () => {
           </div>
         </div>
 
-        <div style={styles.buttonContainer}>
+         <div style={styles.buttonContainer}>
+          {/* 1. "내 정보 수정" 버튼 추가 */}
+          <button style={styles.button} onClick={() => alert('내 정보 수정 페이지로 이동합니다.')}>
+            내 정보 수정
+          </button>
+          
           <button style={styles.button} onClick={() => window.location.href = "http://127.0.0.1:8000/my-posts"}>
             내 전단지 보기
           </button>
-
         </div>
       </div>
     </div>
@@ -129,7 +133,7 @@ const styles = {
   buttonContainer: {
     marginTop: '100px',
     display: 'flex',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     alignItems: 'center',
     padding: '0 10px',
   },
