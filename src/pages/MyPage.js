@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // 1. useNavigate 훅을 import 합니다.
 import Navbar from '../components/Navbar'; // 공통 네비게이션 바 컴포넌트
 
 // 사용자 프로필 아이콘 (간단한 SVG로 대체)
@@ -13,6 +14,7 @@ const ProfileIcon = () => (
 
 const MyPage = () => {
   const [userInfo, setUserInfo] = useState(null);
+  const navigate = useNavigate(); // 2. useNavigate 훅을 사용합니다.
 
   useEffect(() => {
     fetch("http://localhost:8000/api/profile", {
@@ -41,6 +43,11 @@ const MyPage = () => {
         // window.location.href = "/login";
       });
   }, []);
+
+  // '내 정보 수정' 버튼 클릭 시 호출될 함수
+  const handleEditProfileClick = () => {
+    navigate('/edit-profile'); // 3. '/edit-profile' 경로로 이동합니다.
+  };
 
   if (!userInfo) {
     return <div>로딩 중...</div>;
@@ -77,8 +84,8 @@ const MyPage = () => {
         </div>
 
          <div style={styles.buttonContainer}>
-          {/* 1. "내 정보 수정" 버튼 추가 */}
-          <button style={styles.button} onClick={() => alert('내 정보 수정 페이지로 이동합니다.')}>
+          {/* "내 정보 수정" 버튼의 onClick 이벤트를 수정합니다. */}
+          <button style={styles.button} onClick={handleEditProfileClick}>
             내 정보 수정
           </button>
           

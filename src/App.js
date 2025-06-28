@@ -9,7 +9,7 @@ import FlyerGallery from './pages/FlyerGallery';
 import Board from './pages/Board';
 import MyPage from './pages/MyPage';
 import StoreDetail from './pages/StoreDetail';
-
+import EditProfile from './pages/EditProfile' 
 function App() {
   return (
     <Router>
@@ -22,6 +22,7 @@ function App() {
         <Route path="/board" element={<Board />} />
         <Route path="/MyPage" element={<MyPage />} />
         <Route path="/store/:storeId" element={<StoreDetail />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
       </Routes>
     </Router>
   );
