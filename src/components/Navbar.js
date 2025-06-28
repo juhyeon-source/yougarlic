@@ -54,14 +54,13 @@ const styles = {
 function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [nickname, setNickname] = useState('');
+  const [searchText, setSearchText] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     const userId = Cookies.get('user_id');
     if (userId) {
       setIsLoggedIn(true);
-
-      // ✅ 닉네임 받아오기
       fetch('http://localhost:8000/api/profile', {
         method: 'GET',
         credentials: 'include',
@@ -79,13 +78,12 @@ function Navbar() {
   }, []);
 
   const handleLogout = () => {
-    // FastAPI 로그아웃 API 호출
     fetch('http://localhost:8000/logout', {
       method: 'GET',
       credentials: 'include',
     })
       .then(() => {
-        Cookies.remove('user_id');  // 쿠키 클라이언트에서도 제거
+        Cookies.remove('user_id');
         setIsLoggedIn(false);
         setNickname('');
         navigate('/');
@@ -94,6 +92,31 @@ function Navbar() {
         console.error("로그아웃 실패:", err);
       });
   };
+
+const handleSearch = async (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (!searchText.trim()) return;
+
+    try {
+      // 1. 이름으로 post_id 가져오기
+      const res = await fetch(`http://localhost:8000/api/posts/get_post_id/?name=${encodeURIComponent(searchText)}`);
+      if (!res.ok) {
+        alert('등록되어 있지 않은 상점입니다.');
+        return;
+      }
+
+      const data = await res.json();
+
+      // 2. post_id로 이동
+      navigate(`/store/${data.post_id}`);
+    } catch (err) {
+      console.error('검색 오류:', err);
+      alert('검색 중 오류가 발생했습니다.');
+    }
+  }
+};
+
 
   return (
     <nav style={styles.navbar}>
@@ -106,22 +129,19 @@ function Navbar() {
         </div>
       </div>
       <div style={styles.rightNav}>
-        <input type="text" placeholder="+ Search" style={styles.searchBar} />
-        {isLoggedIn && (
-          <span style={styles.nickname}>
-            {nickname} 님
-          </span>
-        )}
+        <input
+          type="text"
+          placeholder="+ Search"
+          style={styles.searchBar}
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          onKeyDown={handleSearch} // ◀◀ 키 입력 이벤트로 검색
+        />
+        {isLoggedIn && <span>{nickname} 님</span>}
         {isLoggedIn ? (
           <button
             onClick={handleLogout}
-            style={{
-              ...styles.loginBtn,
-              background: 'none',
-              border: 'none',
-              padding: 0,
-              cursor: 'pointer',
-            }}
+            style={{ ...styles.loginBtn, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
           >
             로그아웃
           </button>
