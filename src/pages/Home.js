@@ -61,7 +61,7 @@ function Home() {
   // 2. handleCreateClick 함수 삭제됨
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.REACT_APP_Maps_API_KEY, // 이 부분과 .env 파일의 변수 이름을 꼭 확인하세요!
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // 이 부분과 .env 파일의 변수 이름을 꼭 확인하세요!
   });
 
   const handlePrev = () => {
